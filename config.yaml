@@ -1,0 +1,50 @@
+# ==================== 核心映射配置 ====================
+# 方向映射：将检测到的left/right方向，映射为接口发送的编码和中文描述
+direction_mapping:
+  # 检测到车辆向右行驶（right）时的配置
+  right:
+    code: 0          # 接口发送的方向编码（可根据业务调整）
+    desc: "正向"     # 对应的中文描述（用于日志展示）
+  # 检测到车辆向左行驶（left）时的配置
+  left:
+    code: 1          # 接口发送的方向编码（可根据业务调整）
+    desc: "反向"     # 对应的中文描述（用于日志展示）
+
+# 状态映射：将车辆停车/行驶状态，映射为接口发送的编码和中文描述
+status_mapping:
+  # 车辆停车状态（stopped）配置
+  stopped:
+    code: 0          # 接口发送的状态编码（0=已停车）
+    desc: "已停车"   # 对应的中文描述（用于日志展示）
+  # 车辆行驶状态（moving）配置
+  moving:
+    code: 1          # 接口发送的状态编码（1=行驶中）
+    desc: "行驶中"   # 对应的中文描述（用于日志展示）
+
+# ==================== 阈值配置（核心算法参数） ====================
+# 各类帧计数/距离阈值，控制算法判断逻辑的灵敏度
+thresholds:
+  stop_thresh: 3           # 停车判定阈值：像素位移小于该值则认为车辆静止（值越小越灵敏）
+  stop_frames: 65          # 停车稳定帧：连续N帧静止才判定为"已停车"（值越大判定越稳定）
+  dir_frames: 30           # 方向稳定帧：连续N帧同一方向才判定为稳定方向（值越大方向判定越准）
+  ignore_start_frames: 2   # 启动忽略帧：车辆从停车启动后，前N帧忽略方向判断（避免启动抖动）
+  restart_dir_frames: 15   # 重启方向帧：车辆启动后，连续N帧同一方向才更新状态（防止方向频繁变化）
+  no_car_frames: 20        # 无车清空帧：连续N帧未检测到车辆，清空所有状态（释放资源）
+  car_end_wait_seconds: 15  # 过车结束后显示“过车结束”的秒数，之后才显示“没有车辆”
+
+# ==================== 区域/路径配置 ====================
+count_area: [320, 60, 850, 520]  # 计数区域：(x1, y1, x2, y2) 车辆进入该区域才进行计数/方向判断
+model_path: "E:\\yoloV8MAIN\\ultralytics-main\\MuBiaoGenZong\\runs\\detect\\train\\weights\\train.pt"  # YOLO模型权重文件路径
+source: "E:\\yoloV8MAIN/ultralytics-main/MuBiaoGenZong/train.mp4"  # 视频源：支持本地视频/RTSP流（如rtsp://xxx.xxx.xxx.xxx:554/stream）
+
+# ==================== 模型推理配置 ====================
+device: "cuda:0"   # 推理设备：cuda:0（GPU）/ cpu（CPU），程序会自动降级为CPU（若GPU不可用）
+conf: 0.3          # 置信度阈值：检测框置信度大于该值才认为是有效车辆（值越大误检越少）
+iou: 0.4           # IOU阈值：非极大值抑制的IOU阈值（控制重复检测框合并）
+imgsz: 640         # 推理图片尺寸：模型输入图片的分辨率（需与训练时一致）
+
+# ==================== 接口配置 ====================
+api:
+  update_status_url: "http://192.168.110.158:58012/api/Vehicle/UpdateStatus"  # 车辆状态更新接口地址（发送状态/方向编码）
+  UpdateEndStatus: "http://192.168.110.158:58012/api/Vehicle/UpdateEndStatus"       # 发送车辆过来的信号和结束的信号
+  UpdateOrder : "http://192.168.110.158:58012/api/Vehicle/UpdateOrder"  # 发送顺位

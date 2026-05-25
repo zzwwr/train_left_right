@@ -1,0 +1,13 @@
+# 🔥 最强稳定跟踪：1小时不切换ID专用
+tracker_type: bytetrack
+track_high_thresh: 0.6        # 高质量目标门槛拉高
+track_low_thresh: 0.3         # 低质量只补帧，不新建
+new_track_thresh: 0.7          # 新建ID超级严格（最关键）
+track_buffer: 0              # 消失后保留120帧（约4秒）不丢ID
+match_thresh: 0.85             # 匹配超级严格
+proximity_thresh: 0.7          # 位置优先（更稳）
+appearance_thresh: 0.25        # 外观权重降低
+with_cmc: true                 # 相机抖动补偿
+with_reid: false               # 关闭ReID，不跳ID
+fuse_score: true               # 置信度融合，不丢目标
+mot20: false
